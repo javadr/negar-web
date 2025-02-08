@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+import re
 import streamlit as st
-import sys
-from pathlib import Path
+from redlines import Redlines
+
 
 # https://stackoverflow.com/questions/16981921
-sys.path.append(Path(__file__).parent.parent.as_posix())
+# sys.path.append(Path(__file__).parent.parent.as_posix())
 from negar.virastar import PersianEditor  # noqa: E402
 from negar.constants import INFO, __version__  # noqa: E402
 
@@ -23,7 +24,13 @@ st.set_page_config(
 )
 
 # Streamlit App Layout
-
+with st.sidebar:
+    comparative_mode = st.checkbox(
+        "Comparative Mode",
+        key="comparative_mode",
+        help="Toggle comparative mode.",
+        # on_change=lambda: pass,
+    )
 # Title and Description
 st.title("Negar")
 st.markdown("""
@@ -74,11 +81,22 @@ if st.button("Edit"):
     if user_input.strip():
         with st.spinner("Analyzing..."):
             st.subheader("Results:")
+
             edited_text = []
             for line in user_input.strip().split("\n"):
                 line = line.strip()
                 run_PE = PersianEditor(line)
-                edited_text.append(run_PE.cleanup())
+                if comparative_mode:
+                    edited_text.append(
+                        Redlines(
+                            re.sub(r"\s*?\n", " <br> ", line),
+                            run_PE.cleanup().strip(),
+                        ).output_markdown
+                        if line
+                        else ""
+                    )
+                else:
+                    edited_text.append(run_PE.cleanup())
                 # Display Results
             st.markdown(
                 f'<p class="rtl-text">{"<br/>".join(edited_text)}</p>',
