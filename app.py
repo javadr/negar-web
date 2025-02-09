@@ -25,6 +25,7 @@ st.set_page_config(
 
 # Streamlit App Layout
 with st.sidebar:
+    st.markdown(f"# Negar *{__version__}*")
     comparative_mode = st.checkbox(
         "Comparative Mode",
         key="comparative_mode",
