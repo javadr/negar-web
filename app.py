@@ -23,20 +23,54 @@ st.set_page_config(
     },
 )
 
+editing_options = {
+    "Fix Dashes": "fix-dashes",
+    "Fix three dots": "fix-three-dots",
+    "Fix English quotes": "fix-english-quotes",
+    "Fix hamzeh": "fix-hamzeh",
+    "Use Persian yeh to show hamzeh": "hamzeh-with-yeh",
+    "Fix spacing braces and quotes": "fix-spacing-bq",
+    "Fix Arabic numbers": "fix-arabic-num",
+    "Fix English numbers": "fix-english-num",
+    "Fix non Persian chars": "fix-non-persian-chars",
+    "Fix prefix spacing": "fix-p-spacing",
+    "Fix prefix separating": "fix-p-separate",
+    "Fix suffix spacing": "fix-s-spacing",
+    "Fix suffix separating": "fix-s-separate",
+    "Fix aggressive punctuation": "aggressive",
+    "Cleanup kashidas": "cleanup-kashidas",
+    "Cleanup extra marks": "cleanup-ex-marks",
+    "Cleanup spacing": "cleanup-spacing",
+    "Trim Leading Trailing Whitespaces": "trim-lt-whitespaces",
+    "Exaggerating ZWNJ": "exaggerating-zwnj",
+}
+
+# Dictionary to store checkbox states
+selected_options = {}
+
 # Streamlit App Layout
 with st.sidebar:
+    # Title and Description
     st.markdown(f"# Negar *{__version__}*")
+    st.markdown("""
+    Persian Text Editor.
+    """)
+
     comparative_mode = st.checkbox(
         "Comparative Mode",
         key="comparative_mode",
         help="Toggle comparative mode.",
         # on_change=lambda: pass,
     )
-# Title and Description
-st.title("Negar")
-st.markdown("""
-Persian Text Editor.
-""")
+
+    # Create checkboxes dynamically
+    with st.expander("🔧 Configure Editing Options", expanded=False):
+        for label, value in editing_options.items():
+            selected_options[value] = st.checkbox(label, value=True)
+
+    get_options = lambda: [key for key, checked in selected_options.items() if not checked]
+
+
 st.markdown(
     "",
     unsafe_allow_html=True,
@@ -86,7 +120,7 @@ if st.button("Edit"):
             edited_text = []
             for line in user_input.strip().split("\n"):
                 line = line.strip()
-                run_PE = PersianEditor(line)
+                run_PE = PersianEditor(line, *get_options())
                 if comparative_mode:
                     edited_text.append(
                         Redlines(
